@@ -1,6 +1,7 @@
 import numpy as np
 import solution
 import parameters
+import problem
 
 class Model:
 
@@ -10,17 +11,21 @@ class Model:
         self.solution = solution.Solution(self.parameters)
 
 
-#    def compute_next(self):
-#
-#        # compute next model
-#
-#        problem = Problem(self.parameters, self.solution)
-#
-#        new_solution = problem.solve()
-#
-#        new_model = Model(parameters, new_solution)
-#
-#        return new_model
+    def compute_next(self):
+
+        # compute next model
+
+        prob = problem.Problem(self.parameters, self.solution)
+
+        try:
+            new_solution = prob.solve()
+        except:
+            pass
+
+
+        #new_model = Model(self.parameters, new_solution)
+
+        return new_solution
 #
 #
 #    def plot(self):
@@ -43,12 +48,13 @@ if __name__ == '__main__':
     dx = 1 # m
     E = 15/(1-0.2**2) # GPa
     mu = 12*0.02 # Pa*s
+    mu = 12*1e-10 # Pa*s
     K = 4*(2/np.pi)**(1/2)*1 # MPa*m^(1/2)
     Q = 0.0004*1e3 # [m^3/s]*10^-3
     h = 50 # m
-    t = 10 # s
+    t = 100 # s
     Cp = 2*3*1e-6*1e3
-    N = 5 # number of elements on each wing not including the center element
+    N = 2 # number of elements on each wing not including the center element
     # total number of elements is 2*N+1
 
     t_stop = 1000 # s
@@ -72,12 +78,13 @@ def test():
     dx = 1 # m
     E = 15/(1-0.2**2) # GPa
     mu = 12*0.02 # Pa*s
+    mu = 12*1e-6 # Pa*s
     K = 4*(2/np.pi)**(1/2)*1 # MPa*m^(1/2)
     Q = 0.0004*1e3 # [m^3/s]*10^-3
     h = 50 # m
-    t = 10 # s
+    t = 100 # s
     Cp = 2*3*1e-6*1e3
-    N = 5 # number of elements on each wing not including the center element
+    N = 4 # number of elements on each wing not including the center element
     # total number of elements is 2*N+1
 
     t_stop = 1000 # s
@@ -94,4 +101,8 @@ def test():
                             t=t)
     model = Model(params)
 
-    return model.solution
+    new_solution = model.compute_next()
+
+    return model.solution, new_solution
+
+

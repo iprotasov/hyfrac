@@ -14,15 +14,15 @@ app = dash.Dash(__name__)
 application = app.server
 
 app.layout = html.Div(children=[
-    html.H1(children='Frequency Band Calculation'),
+    html.H1(children='hyfrac'),
 
-    html.Div(children='This app calculates the frequency bands'),
+    html.Div(children='hyfrac testing'),
 
     html.Button(id='submit-button', n_clicks=None, children='Submit'),
 
-    html.Div(id='output-text', children='hey'),
+    html.Div(id='output-text', children=''),
 
-    html.Div(id='output-fig', children='hey')
+    html.Div(id='output-fig', children='')
 ])
 
 @app.callback(Output('output-fig', 'children'),
@@ -33,17 +33,19 @@ def update_text(n_clicks):
     return dcc.Loading(
             id='loading',
             type='default',
-            children=dcc.Graph(id='figure'))
+            children=[dcc.Graph(id='figure'),
+                      dcc.Graph(id='figure2')])
 
 @app.callback(Output('figure', 'figure'),
+              Output('figure2', 'figure'),
               Output('output-text', 'children'),
               Input('output-fig','children'))
 def update_text2(children):
-    solution = model.test()
+    solution, new_solution = model.test()
     fig = px.line(x=solution.x_vector,y=solution.w_vector)
-    out_text = solution.p_vector[0]
-    out_text = f'{(solution.w_vector*solution.h_vector*solution.dl_vector).sum()}\n,{solution.fracture_volume}'
-    return fig, out_text
+    fig2 = px.line(x=new_solution.x_vector,y=new_solution.w_vector)
+    out_text = f'{new_solution.p_vector}'
+    return fig, fig2, out_text
 
 if __name__ == '__main__':
     application.run(debug=True, host='172.31.35.145')
