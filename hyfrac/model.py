@@ -2,44 +2,49 @@ import numpy as np
 import solution
 import parameters
 import problem
+import copy
 
 class Model:
 
 
-    def __init__(self, parameters=None):
+    def __init__(self, parameters, solution_=None):
+
         self.parameters = parameters
-        self.solution = solution.Solution(self.parameters)
+
+        if solution_:
+            self.solution = solution_
+        else:
+            self.solution = solution.Solution(self.parameters)
+
+
+    def asdict(self):
+        return {'parameters': self.parameters.asdict(),
+                'solution': self.solution.asdict()}
+
+
+    @classmethod
+    def fromdict(cls, in_dict):
+        parameters_ = parameters.Parameters.fromdict(in_dict['parameters'])
+        solution_ = solution.Solution.fromdict(in_dict['solution'])
+        return cls(parameters_, solution_)
 
 
     def compute_next(self):
 
         # compute next model
 
-        prob = problem.Problem(self.parameters, self.solution)
+        self.problem = problem.Problem(self.parameters, self.solution)
 
         try:
-            new_solution = prob.solve()
-        except:
-            pass
+            new_solution = self.problem.solve()
+        except Exception as e: raise
 
+        new_parameters = copy.deepcopy(self.parameters)
+        new_parameters.t += self.parameters.dt
+        new_model = Model(new_parameters, new_solution)
 
-        #new_model = Model(self.parameters, new_solution)
+        return new_model
 
-        return new_solution
-#
-#
-#    def plot(self):
-#
-#        # plot solution
-#        fig = None
-#
-#        return fig
-#
-#
-#    def save(self, filename):
-#
-#        # save model to file
-#
 
 if __name__ == '__main__':
 
@@ -101,8 +106,34 @@ def test():
                             t=t)
     model = Model(params)
 
-    new_solution = model.compute_next()
+    new_model = model.compute_next()
 
-    return model.solution, new_solution
+    return model, new_model
+
+
+def compute_initial_solution(nu,
+                            E,
+                            K,
+                            Cp,
+                            mu,
+                            Q,
+                            h,
+                            N,
+                            dt,
+                            t):
+
+    params = parameters.Parameters(nu=nu,
+                            E=E,
+                            K=K,
+                            Cp=Cp,
+                            mu=mu,
+                            Q=Q,
+                            h=h,
+                            N=N,
+                            dt=dt,
+                            t=t)
+    model = Model(params)
+
+    return model
 
 
